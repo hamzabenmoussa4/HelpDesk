@@ -1,0 +1,19 @@
+# Java et Maven
+Backend_HelpDesk/target/
+*.class
+
+# Angular
+Frontend_HelpDesk/node_modules/
+Frontend_HelpDesk/dist/
+Frontend_HelpDesk/.angular/
+
+# IDE et secrets
+.idea/
+.env
+.env.*
+!.env.example
+*.log
+
+# Images temporaires extraites du PDF
+/page-2.png
+/page-3.png
