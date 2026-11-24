@@ -1,0 +1,139 @@
+<!-- Titre et action principale du module de catégories. -->
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">CLASSIFICATION</p>
+    <h1>Catégories</h1>
+    <p class="subtitle">Organisez les incidents pour faciliter leur orientation.</p>
+  </div>
+  <span class="total-badge">{{ categories().length }} résultat(s)</span>
+</header>
+
+<!-- Un même formulaire sert à créer une catégorie ou à modifier une ligne existante. -->
+<section class="form-card">
+  <div class="card-heading">
+    <div>
+      <p class="eyebrow">
+        {{ identifiantEnEdition() === null ? 'NOUVELLE ENTRÉE' : 'MODIFICATION' }}
+      </p>
+      <h2>
+        {{ identifiantEnEdition() === null ? 'Créer une catégorie' : 'Modifier une catégorie' }}
+      </h2>
+    </div>
+  </div>
+  <form [formGroup]="formulaire" (ngSubmit)="enregistrer()" novalidate>
+    <div class="form-fields">
+      <label class="field"
+        >Nom <span class="required">*</span>
+        <input
+          type="text"
+          formControlName="nom"
+          placeholder="Ex. Réseau, Matériel…"
+          maxlength="100"
+        />
+        @if (formulaire.controls.nom.touched && formulaire.controls.nom.hasError('required')) {
+          <small class="field-error">Le nom est obligatoire.</small>
+        }
+        @if (formulaire.controls.nom.touched && formulaire.controls.nom.hasError('maxlength')) {
+          <small class="field-error">100 caractères maximum.</small>
+        }
+      </label>
+      <label class="field description-field"
+        >Description
+        <textarea
+          formControlName="description"
+          rows="2"
+          placeholder="Décrivez les incidents concernés…"
+          maxlength="500"
+        ></textarea>
+      </label>
+      <label class="active-field"
+        ><input type="checkbox" formControlName="active" /><span>Catégorie active</span></label
+      >
+    </div>
+    <div class="form-actions">
+      @if (identifiantEnEdition() !== null) {
+        <button class="button secondary" type="button" (click)="annulerEdition()">Annuler</button>
+      }
+      <button class="button primary" type="submit" [disabled]="enregistrement()">
+        {{
+          enregistrement()
+            ? 'Enregistrement…'
+            : identifiantEnEdition() === null
+              ? 'Créer la catégorie'
+              : 'Enregistrer les changements'
+        }}
+      </button>
+    </div>
+  </form>
+</section>
+
+<!-- Affiche les messages renvoyés par le serveur ou calculés côté formulaire. -->
+@if (message()) {
+  <p class="notice success" role="status">{{ message() }}</p>
+}
+@if (erreur()) {
+  <p class="notice error" role="alert">{{ erreur() }}</p>
+}
+
+<section class="list-section">
+  <div class="list-heading">
+    <div>
+      <p class="eyebrow">RÉFÉRENTIEL</p>
+      <h2>Liste des catégories</h2>
+    </div>
+    <label class="filter-label"
+      >Afficher
+      <select [value]="filtre()" (change)="changerFiltre($event)">
+        <option value="toutes">Toutes</option>
+        <option value="actives">Actives</option>
+        <option value="inactives">Inactives</option>
+      </select>
+    </label>
+  </div>
+  <div class="table-card">
+    @if (chargement()) {
+      <p class="table-state">Chargement des catégories…</p>
+    } @else if (categories().length === 0) {
+      <p class="table-state">
+        Aucune catégorie à afficher. Tu peux en créer une avec le formulaire ci-dessus.
+      </p>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Description</th>
+              <th>État</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (categorie of categories(); track categorie.id) {
+              <tr>
+                <td class="name-cell">{{ categorie.nom }}</td>
+                <td class="description-cell">{{ categorie.description || '—' }}</td>
+                <td>
+                  <span class="status" [class.inactive]="!categorie.active">{{
+                    categorie.active ? 'Active' : 'Inactive'
+                  }}</span>
+                </td>
+                <td class="actions">
+                  <button class="text-button" type="button" (click)="commencerEdition(categorie)">
+                    Modifier</button
+                  ><button
+                    class="text-button delete-button"
+                    type="button"
+                    (click)="supprimer(categorie)"
+                  >
+                    Supprimer
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

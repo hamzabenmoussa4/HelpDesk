@@ -1,1 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
+/* Styles généraux ; chaque composant garde ses styles dans son propre fichier. */
+* {
+  box-sizing: border-box;
+}
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: #f5f7fa;
+}
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  color: #26384d;
+  background: #f5f7fa;
+  font-family: Inter, 'Segoe UI', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
