@@ -1,0 +1,112 @@
+<!-- Écran autonome de connexion, affiché sans le menu principal de HelpDesk. -->
+<main class="login-page">
+  <section class="brand-panel" aria-label="HelpDesk">
+    <a class="brand" routerLink="/dashboard" aria-label="Retour à HelpDesk">
+      <span class="brand-mark">H</span><span>HelpDesk</span>
+    </a>
+    <div class="brand-message">
+      <p class="overline">ASSISTANCE INFORMATIQUE</p>
+      <h1>Chaque incident<br />a sa solution.</h1>
+      <p>Un espace centralisé pour déclarer, suivre et résoudre les incidents informatiques.</p>
+    </div>
+    <p class="brand-footer">Plateforme interne · HelpDesk</p>
+    <span class="decor decor-one"></span><span class="decor decor-two"></span>
+  </section>
+
+  <section class="form-panel">
+    <div class="login-card">
+      <a class="mobile-brand" routerLink="/dashboard"><span class="brand-mark">H</span> HelpDesk</a>
+      <p class="eyebrow">BON RETOUR</p>
+      <h2>Connectez-vous</h2>
+      <p class="intro">Saisissez vos identifiants pour accéder à votre espace de travail.</p>
+
+      <form [formGroup]="formulaire" (ngSubmit)="seConnecter()" novalidate>
+        <label for="email">Adresse e-mail</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉</span
+          ><input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="nom@entreprise.com"
+            autocomplete="username"
+          />
+        </div>
+        @if (formulaire.controls.email.touched && formulaire.controls.email.invalid) {
+          <small class="field-error">Saisis une adresse e-mail valide.</small>
+        }
+
+        <label class="password-label" for="motDePasse"
+          >Mot de passe <span>Mot de passe oublié ?</span></label
+        >
+        <div class="input-wrap">
+          <span class="input-icon">▣</span
+          ><input
+            id="motDePasse"
+            [type]="afficherMotDePasse() ? 'text' : 'password'"
+            formControlName="motDePasse"
+            placeholder="Au moins 8 caractères"
+            autocomplete="current-password"
+          /><button type="button" class="show-password" (click)="basculerVisibiliteMotDePasse()">
+            {{ afficherMotDePasse() ? 'Masquer' : 'Afficher' }}
+          </button>
+        </div>
+        @if (formulaire.controls.motDePasse.touched && formulaire.controls.motDePasse.invalid) {
+          <small class="field-error">Le mot de passe doit contenir au moins 8 caractères.</small>
+        }
+
+        <label class="remember"
+          ><input type="checkbox" formControlName="resterConnecte" /><span
+            >Se souvenir de moi</span
+          ></label
+        >
+        <button class="submit-button" type="submit">
+          Se connecter <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      @if (message()) {
+        <p class="form-message" role="status">{{ message() }}</p>
+      }
+      <p class="prototype-note">
+        <span>i</span> Connexion de démonstration côté navigateur. Ces comptes sont publics et ne
+        sécurisent pas les données ; il faudra les remplacer par l’authentification backend.
+      </p>
+      <div class="demo-divider"><span>ou</span></div>
+      <button
+        class="demo-toggle"
+        type="button"
+        [attr.aria-expanded]="accesDemoVisibles()"
+        (click)="basculerAccesDemo()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 3 5 6v5c0 4.6 2.9 8.6 7 10 4.1-1.4 7-5.4 7-10V6l-7-3Zm0 3.1 4 1.7v3.2c0 3.2-1.8 6.1-4 7.3-2.2-1.2-4-4.1-4-7.3V7.8l4-1.7Z"
+          />
+        </svg>
+        {{
+          accesDemoVisibles()
+            ? 'Masquer les accès de démonstration'
+            : 'Afficher les accès de démonstration'
+        }}
+      </button>
+      @if (accesDemoVisibles()) {
+        <section class="demo-accounts" aria-label="Comptes de démonstration">
+          <h3>Choisis un compte pour remplir le formulaire</h3>
+          @for (compte of comptesDemo; track compte.role) {
+            <button class="demo-account" type="button" (click)="utiliserCompte(compte)">
+              <span class="demo-role">{{ compte.role }}</span>
+              <span
+                ><small>E-mail</small><strong>{{ compte.email }}</strong></span
+              >
+              <span
+                ><small>Mot de passe</small><strong>{{ compte.motDePasse }}</strong></span
+              >
+            </button>
+          }
+        </section>
+      }
+      <p class="help-link">Besoin d’aide ? Contactez l’administrateur de la plateforme.</p>
+    </div>
+  </section>
+</main>

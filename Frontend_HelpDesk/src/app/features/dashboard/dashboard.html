@@ -1,0 +1,67 @@
+<!-- Cette vue utilise les signaux du composant pour afficher l'état de l'API. -->
+<div class="welcome-row">
+  <div>
+    <p class="eyebrow">VOTRE ESPACE DE TRAVAIL</p>
+    <h1>Tableau de bord</h1>
+    @if (utilisateur(); as compte) {
+      <p class="subtitle">
+        Bonjour {{ compte.nomComplet }} — session de démonstration : {{ compte.role }}.
+      </p>
+    } @else {
+      <p class="subtitle">Suivez et gérez les incidents informatiques de votre équipe.</p>
+    }
+  </div>
+  <span class="date-chip">HelpDesk · Développement</span>
+</div>
+
+<section class="connection-card" aria-live="polite">
+  <div class="connection-icon">↔</div>
+  <div class="connection-copy">
+    <p class="card-label">CONNEXION AU BACKEND</p>
+    @if (enChargement()) {
+      <h2>Vérification en cours…</h2>
+      <p>Angular contacte l’API Spring Boot.</p>
+    } @else if (resultat(); as api) {
+      <h2 class="success-title">API disponible</h2>
+      <p>{{ api.application }} répond avec le statut « {{ api.status }} ».</p>
+    } @else {
+      <h2 class="error-title">Connexion impossible</h2>
+      <p>{{ erreur() }}</p>
+    }
+  </div>
+  <span class="connection-pill" [class.connected]="resultat() !== null">{{
+    resultat() ? 'CONNECTÉE' : enChargement() ? 'EN COURS' : 'HORS LIGNE'
+  }}</span>
+</section>
+
+<div class="section-heading">
+  <div>
+    <p class="eyebrow">GESTION</p>
+    <h2>Modules de l’application</h2>
+  </div>
+  <span class="module-count">3 modules</span>
+</div>
+<section class="module-grid" aria-label="Modules HelpDesk">
+  <article class="module-card">
+    <span class="module-icon ticket-icon">▤</span>
+    <p class="module-label">SUIVI DES DEMANDES</p>
+    <h3>Tickets</h3>
+    <p>Déclarer les incidents, suivre leur statut et leur affectation.</p>
+  </article>
+  <article class="module-card">
+    <span class="module-icon category-icon">▦</span>
+    <p class="module-label">CLASSIFICATION</p>
+    <h3>Catégories</h3>
+    <p>Organiser les incidents par domaine pour faciliter leur traitement.</p>
+  </article>
+  <article class="module-card">
+    <span class="module-icon user-icon">♙</span>
+    <p class="module-label">ÉQUIPE</p>
+    <h3>Utilisateurs</h3>
+    <p>Gérer les demandeurs, les techniciens et les administrateurs.</p>
+  </article>
+</section>
+<p class="learning-note">
+  <strong>Étape 1 :</strong> cette page vérifie le trajet du navigateur vers Angular, puis vers
+  l’API Spring Boot.
+</p>

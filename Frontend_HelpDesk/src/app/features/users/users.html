@@ -1,0 +1,139 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">ÉQUIPE ET ACCÈS</p>
+    <h1>Utilisateurs</h1>
+    <p class="subtitle">Gérez les demandeurs, les techniciens et les administrateurs.</p>
+  </div>
+  <span class="total-badge">{{ utilisateurs().length }} résultat(s)</span>
+</header>
+<section class="form-card">
+  <p class="eyebrow">{{ editionId() === null ? 'NOUVEAU COMPTE' : 'MODIFICATION' }}</p>
+  <h2>{{ editionId() === null ? 'Créer un utilisateur' : 'Modifier un utilisateur' }}</h2>
+  <form [formGroup]="formulaire" (ngSubmit)="enregistrer()" novalidate>
+    <div class="fields">
+      <label
+        >Nom *<input formControlName="nom" maxlength="80" placeholder="Nom de famille" />
+        @if (formulaire.controls.nom.touched && formulaire.controls.nom.invalid) {
+          <small>Le nom est obligatoire (80 caractères maximum).</small>
+        }
+      </label>
+      <label
+        >Prénom *<input formControlName="prenom" maxlength="80" placeholder="Prénom" />
+        @if (formulaire.controls.prenom.touched && formulaire.controls.prenom.invalid) {
+          <small>Le prénom est obligatoire (80 caractères maximum).</small>
+        }
+      </label>
+      <label
+        >E-mail *<input
+          type="email"
+          formControlName="email"
+          maxlength="180"
+          placeholder="nom@exemple.com"
+        />
+        @if (formulaire.controls.email.touched && formulaire.controls.email.invalid) {
+          <small>Saisis une adresse e-mail valide.</small>
+        }
+      </label>
+      <label
+        >Rôle *<select formControlName="role">
+          @for (role of roles; track role) {
+            <option [value]="role">{{ role }}</option>
+          }
+        </select></label
+      >
+      @if (editionId() !== null) {
+        <label class="active-check"
+          ><input type="checkbox" formControlName="actif" /> Compte actif</label
+        >
+      }
+    </div>
+    <div class="actions">
+      <button type="button" class="button secondary" (click)="annuler()">
+        {{ editionId() === null ? 'Vider le formulaire' : 'Annuler' }}</button
+      ><button type="submit" class="button primary" [disabled]="enregistrement()">
+        {{
+          enregistrement()
+            ? 'Enregistrement…'
+            : editionId() === null
+              ? 'Créer l’utilisateur'
+              : 'Enregistrer'
+        }}
+      </button>
+    </div>
+  </form>
+</section>
+@if (message()) {
+  <p class="notice success" role="status">{{ message() }}</p>
+}
+@if (erreur()) {
+  <p class="notice error" role="alert">{{ erreur() }}</p>
+}
+<section class="list-section">
+  <div class="list-heading">
+    <div>
+      <p class="eyebrow">ANNUAIRE</p>
+      <h2>Liste des utilisateurs</h2>
+    </div>
+    <div class="filters">
+      <label
+        >Rôle<select [value]="filtreRole()" (change)="changerFiltre($event, 'role')">
+          <option value="TOUS">Tous</option>
+          @for (role of roles; track role) {
+            <option [value]="role">{{ role }}</option>
+          }
+        </select></label
+      ><label
+        >État<select [value]="filtreEtat()" (change)="changerFiltre($event, 'etat')">
+          <option value="actifs">Actifs</option>
+          <option value="inactifs">Inactifs</option>
+          <option value="tous">Tous</option>
+        </select></label
+      >
+    </div>
+  </div>
+  <div class="table-card">
+    @if (chargement()) {
+      <p class="table-state">Chargement des utilisateurs…</p>
+    } @else if (utilisateurs().length === 0) {
+      <p class="table-state">Aucun utilisateur ne correspond au filtre.</p>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>E-mail</th>
+              <th>Rôle</th>
+              <th>État</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of utilisateurs(); track u.id) {
+              <tr>
+                <td class="name-cell">{{ u.prenom }} {{ u.nom }}</td>
+                <td>{{ u.email }}</td>
+                <td>
+                  <span class="role">{{ u.role }}</span>
+                </td>
+                <td>
+                  <span class="status" [class.inactive]="!u.actif">{{
+                    u.actif ? 'Actif' : 'Inactif'
+                  }}</span>
+                </td>
+                <td class="row-actions">
+                  <button class="text-button" type="button" (click)="editer(u)">Modifier</button>
+                  @if (u.actif) {
+                    <button class="text-button danger" type="button" (click)="desactiver(u)">
+                      Désactiver
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

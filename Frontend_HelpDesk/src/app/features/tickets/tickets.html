@@ -1,0 +1,234 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">INCIDENTS INFORMATIQUES</p>
+    <h1>Tickets</h1>
+    <p class="subtitle">Déclarez les incidents et suivez leur traitement.</p>
+  </div>
+  <span class="total-badge">{{ tickets().length }} résultat(s)</span>
+</header>
+<section class="form-card">
+  <p class="eyebrow">{{ editionId() === null ? 'NOUVELLE DEMANDE' : 'MODIFICATION' }}</p>
+  <h2>{{ editionId() === null ? 'Créer un ticket' : 'Modifier le ticket' }}</h2>
+  <form [formGroup]="formulaire" (ngSubmit)="enregistrer()" novalidate>
+    <div class="fields">
+      <label class="wide"
+        >Titre *<input
+          formControlName="titre"
+          maxlength="150"
+          placeholder="Résumé court de l’incident"
+        />
+        @if (formulaire.controls.titre.touched && formulaire.controls.titre.invalid) {
+          <small>Le titre est obligatoire (150 caractères maximum).</small>
+        }
+      </label>
+      <label class="wide"
+        >Description *<textarea
+          formControlName="description"
+          rows="3"
+          placeholder="Décrivez le problème, son contexte et ses conséquences…"
+        ></textarea>
+        @if (formulaire.controls.description.touched && formulaire.controls.description.invalid) {
+          <small>La description est obligatoire.</small>
+        }
+      </label>
+      <label
+        >Catégorie *<select formControlName="categorieId">
+          <option [ngValue]="0" disabled>Choisir une catégorie</option>
+          @for (c of categories(); track c.id) {
+            <option [ngValue]="c.id">{{ c.nom }}</option>
+          }
+        </select>
+        @if (categories().length === 0) {
+          <small>Crée d’abord une catégorie active.</small>
+        }
+      </label>
+      <label
+        >Demandeur *<select formControlName="demandeurId">
+          <option [ngValue]="0" disabled>Choisir un demandeur</option>
+          @for (u of demandeurs(); track u.id) {
+            <option [ngValue]="u.id">{{ u.prenom }} {{ u.nom }}</option>
+          }
+        </select>
+        @if (demandeurs().length === 0) {
+          <small>Crée d’abord un utilisateur avec le rôle DEMANDEUR.</small>
+        }
+      </label>
+      <label
+        >Technicien affecté<select formControlName="technicienAssigneId">
+          <option [ngValue]="0">Non affecté</option>
+          @for (u of techniciens(); track u.id) {
+            <option [ngValue]="u.id">{{ u.prenom }} {{ u.nom }}</option>
+          }
+        </select></label
+      >
+      <label
+        >Priorité<select formControlName="priorite">
+          @for (p of priorites; track p) {
+            <option [value]="p">{{ p }}</option>
+          }
+        </select></label
+      >
+      <label
+        >Statut<select formControlName="statut">
+          @for (s of statuts; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select></label
+      >
+    </div>
+    <div class="actions">
+      <button type="button" class="button secondary" (click)="annulerEdition()">
+        {{ editionId() === null ? 'Vider le formulaire' : 'Annuler' }}</button
+      ><button type="submit" class="button primary" [disabled]="enregistrement()">
+        {{
+          enregistrement()
+            ? 'Enregistrement…'
+            : editionId() === null
+              ? 'Créer le ticket'
+              : 'Enregistrer'
+        }}
+      </button>
+    </div>
+  </form>
+</section>
+@if (message()) {
+  <p class="notice success" role="status">{{ message() }}</p>
+}
+@if (erreur()) {
+  <p class="notice error" role="alert">{{ erreur() }}</p>
+}
+<section class="list-section">
+  <div class="list-heading">
+    <div>
+      <p class="eyebrow">SUIVI</p>
+      <h2>Liste des tickets</h2>
+    </div>
+    <label class="filter"
+      >Statut<select [value]="filtreStatut()" (change)="changerFiltre($event)">
+        <option value="TOUS">Tous</option>
+        @for (s of statuts; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select></label
+    >
+  </div>
+  <div class="table-card">
+    @if (chargement()) {
+      <p class="table-state">Chargement des tickets…</p>
+    } @else if (tickets().length === 0) {
+      <p class="table-state">
+        Aucun ticket à afficher. Utilise le formulaire ci-dessus pour en créer un.
+      </p>
+    } @else {
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Catégorie</th>
+              <th>Demandeur</th>
+              <th>Priorité</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of tickets(); track t.id) {
+              <tr>
+                <td class="ticket-name">
+                  <strong>{{ t.titre }}</strong
+                  ><small>#{{ t.id }} · {{ t.description }}</small>
+                </td>
+                <td>{{ t.categorieNom }}</td>
+                <td>
+                  {{ t.demandeurNom
+                  }}<small class="subline">{{
+                    t.technicienNom ? 'Assigné à ' + t.technicienNom : 'Non affecté'
+                  }}</small>
+                </td>
+                <td>
+                  <span class="priority" [class.critical]="t.priorite === 'CRITIQUE'">{{
+                    t.priorite
+                  }}</span>
+                </td>
+                <td>
+                  <span class="status">{{ t.statut }}</span>
+                </td>
+                <td class="row-actions">
+                  <button class="text-button" type="button" (click)="ouvrirHistorique(t)">
+                    Historique</button
+                  ><button class="text-button" type="button" (click)="editer(t)">Modifier</button
+                  ><button class="text-button danger" type="button" (click)="supprimer(t)">
+                    Supprimer
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Panneau de détails : l'historique est consultable et seulement extensible. -->
+@if (ticketHistorique(); as ticket) {
+  <div class="overlay" (click)="fermerHistorique()">
+    <section
+      class="history-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Historique du ticket"
+      (click)="$event.stopPropagation()"
+    >
+      <header>
+        <div>
+          <p class="eyebrow">JOURNAL DU TICKET #{{ ticket.id }}</p>
+          <h2>{{ ticket.titre }}</h2>
+        </div>
+        <button class="close-button" type="button" (click)="fermerHistorique()" aria-label="Fermer">
+          ×
+        </button>
+      </header>
+      <div class="history-list">
+        @if (historique().length === 0) {
+          <p class="table-state">Aucun événement enregistré pour ce ticket.</p>
+        }
+        @for (h of historique(); track h.id) {
+          <article class="history-item">
+            <span class="timeline-dot"></span>
+            <div>
+              <strong>{{ h.typeEvenement }}</strong
+              ><time>{{ h.dateEvenement | date: 'short' }}</time>
+              <p>{{ h.commentaire || 'Événement de suivi' }}</p>
+              <small
+                >Par {{ h.acteurNom }}
+                @if (h.ancienneValeur || h.nouvelleValeur) {
+                  · {{ h.ancienneValeur || '—' }} → {{ h.nouvelleValeur || '—' }}
+                }
+              </small>
+            </div>
+          </article>
+        }
+      </div>
+      <form class="history-form" [formGroup]="formulaireHistorique" (ngSubmit)="ajouterEvenement()">
+        <h3>Ajouter un commentaire</h3>
+        <label>Type d’événement<input formControlName="typeEvenement" maxlength="60" /></label
+        ><label
+          >Commentaire *<textarea
+            formControlName="commentaire"
+            rows="3"
+            placeholder="Ajoute une information au suivi…"
+          ></textarea></label
+        ><label
+          >Acteur *<select formControlName="acteurId">
+            <option [ngValue]="0" disabled>Qui ajoute cet événement ?</option>
+            @for (u of utilisateursActifs(); track u.id) {
+              <option [ngValue]="u.id">{{ u.prenom }} {{ u.nom }} — {{ u.role }}</option>
+            }
+          </select></label
+        ><button class="button primary" type="submit">Ajouter à l’historique</button>
+      </form>
+    </section>
+  </div>
+}
